@@ -1,0 +1,2028 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Boombox - Spotify</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: transparent;
+            font-family: 'Circular', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            color: white;
+        }
+        
+        .phone-container {
+            width: 400px;
+            height: 750px;
+            background: #000;
+            border-radius: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9);
+            overflow: hidden;
+            border: 5px solid #1a1a1a;
+            position: fixed;
+            bottom: 2vh;  /* 2% da altura da tela */
+            right: 1vw;   /* 1% da largura da tela */
+        }
+
+        
+        .screen {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            background: #121212;
+            position: relative;
+        }
+
+        /* ============ TELA HOME ============ */
+        .home-screen {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .home-header {
+            padding: 20px;
+            background: linear-gradient(180deg, #1DB954 0%, #121212 100%);
+        }
+
+        .home-header h2 {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .home-header p {
+            font-size: 0.85rem;
+            color: #b3b3b3;
+        }
+
+        .recommended-section {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .recommended-section h3 {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .playlist-card {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .playlist-card:hover {
+            background: #282828;
+        }
+
+        .playlist-cover {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            margin-right: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .playlist-info h4 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .playlist-info p {
+            font-size: 0.8rem;
+            color: #b3b3b3;
+        }
+
+        /* ============ TELA DE BUSCA ============ */
+        .search-screen {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .search-header {
+            padding: 20px;
+            background: linear-gradient(180deg, #1DB954 0%, #121212 100%);
+        }
+
+        .search-header h2 {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .search-header p {
+            font-size: 0.85rem;
+            color: #b3b3b3;
+        }
+
+
+        .search-input-wrapper {
+            background: #242424;
+            border-radius: 8px;
+            padding: 12px 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .search-input-wrapper input {
+            background: none;
+            border: none;
+            color: white;
+            flex: 1;
+            margin-left: 10px;
+            outline: none;
+            font-size: 0.95rem;
+        }
+
+        .search-input-wrapper input::placeholder {
+            color: #b3b3b3;
+        }
+
+        .search-results {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0 20px 100px 20px;
+        }
+
+        .search-results h3 {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin: 20px 0 15px 0;
+        }
+
+        .result-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 0;
+            cursor: pointer;
+            transition: background 0.2s;
+            border-radius: 8px;
+            padding: 12px;
+        }
+
+        .result-item:hover {
+            background: #282828;
+        }
+
+        .result-cover {
+            width: 50px;
+            height: 50px;
+            border-radius: 5px;
+            margin-right: 15px;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .result-info {
+            flex: 1;
+        }
+
+        .result-info h4 {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .result-info p {
+            font-size: 0.8rem;
+            color: #b3b3b3;
+        }
+
+        .add-playlist-btn {
+            background: none;
+            /* border: 2px solid #1DB954; */
+            color: #1DB954;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-left: 10px;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .add-playlist-btn:hover {
+            background: #1DB954;
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .add-playlist-btn.added {
+            background: #1DB954;
+            color: white;
+            /* border-color: #1DB954; */
+        }
+
+        /* ============ TELA NOW PLAYING ============ */
+        .now-playing-screen {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+            background: linear-gradient(180deg, #000000 0%, #121212 40%);
+        }
+
+        .np-header {
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 10px;
+            transition: transform 0.2s;
+        }
+
+        .back-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .np-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .album-art {
+            width: 280px;
+            height: 280px;
+            margin: 0 auto 30px;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+            overflow: hidden;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .album-art img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .song-info {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .song-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .artist-name {
+            font-size: 1rem;
+            color: #b3b3b3;
+        }
+
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .volume-control input[type="range"] {
+            flex: 1;
+            height: 4px;
+            background: #4d4d4d;
+            border-radius: 2px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .volume-control input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: white;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .control-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.8rem;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .control-btn:hover {
+            transform: scale(1.15);
+        }
+
+        .play-pause-btn {
+            background: white;
+            color: #121212;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+        }
+
+        /* ============ MINI PLAYER ============ */
+        .mini-player {
+            position: absolute;
+            bottom: 80px;
+            left: 20px;
+            right: 20px;
+            background: #282828;
+            border-radius: 12px;
+            padding: 12px 15px;
+            display: none;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+        }
+
+        .mini-cover {
+            width: 45px;
+            height: 45px;
+            border-radius: 6px;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .mini-info {
+            flex: 1;
+        }
+
+        .mini-info h4 {
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+
+        .mini-info p {
+            font-size: 0.75rem;
+            color: #b3b3b3;
+        }
+
+        .mini-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .mini-controls button {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+
+        /* ============ BOTTOM NAV ============ */
+        .bottom-nav {
+            background: #000;
+            display: flex;
+            justify-content: space-around;
+            padding: 15px 0;
+            border-top: 1px solid #282828;
+        }
+
+        .nav-btn {
+            background: none;
+            border: none;
+            color: #b3b3b3;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            font-size: 0.7rem;
+            transition: color 0.2s;
+        }
+
+        .nav-btn.active {
+            color: white;
+        }
+
+        .nav-btn i {
+            font-size: 1.5rem;
+        }
+
+        /* ============ SCROLLBAR ============ */
+        .recommended-section::-webkit-scrollbar,
+        .search-results::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .recommended-section::-webkit-scrollbar-track,
+        .search-results::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .recommended-section::-webkit-scrollbar-thumb,
+        .search-results::-webkit-scrollbar-thumb {
+            background: #4d4d4d;
+            border-radius: 3px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #b3b3b3;
+            padding: 60px 20px;
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+        .mini-player {
+            z-index: 100 !important;
+        }
+
+        .add-playlist-btn {
+            z-index: 10 !important;
+        }
+
+        .result-card {
+            z-index: 10 !important;
+        }
+
+        
+
+    </style>
+</head>
+<body>
+    <div class="phone-container" id="container" style="display: none;">
+        <div class="screen">
+            <!-- ============ TELA HOME ============ -->
+            <div class="home-screen" id="homeScreen">
+                <div class="home-header">
+                    <h2>🎵 ArtFY</h2>
+                    <p>Suas músicas e playlists</p>
+                </div>
+
+                <div class="recommended-section">
+                    <h3>Recomendadas:</h3>
+                    
+                    <div class="playlist-card" onclick="showLibrary()">
+                        <div class="playlist-cover" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                            <i class="fas fa-music" style="font-size: 1.5rem; color: rgba(255,255,255,0.5);"></i>
+                        </div>
+                        <div class="playlist-info">
+                            <h4>Suas Músicas Curtidas</h4>
+                            <p id="playlistCount">0 músicas</p>
+                        </div>
+                    </div>
+
+                    <div class="playlist-card">
+                        <div class="playlist-cover" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                            <i class="fas fa-fire" style="font-size: 1.5rem; color: rgba(255,255,255,0.5);"></i>
+                        </div>
+                        <div class="playlist-info">
+                            <h4>Daily Mix 1</h4>
+                            <p>Playlist • Spotify</p>
+                        </div>
+                    </div>
+
+                    <div class="playlist-card">
+                        <div class="playlist-cover" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                            <i class="fas fa-headphones" style="font-size: 1.5rem; color: rgba(255,255,255,0.5);"></i>
+                        </div>
+                        <div class="playlist-info">
+                            <h4>Discover Weekly</h4>
+                            <p>Playlist • Spotify</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bottom-nav">
+                    <button class="nav-btn active" onclick="showHome()">
+                        <i class="fas fa-home"></i>
+                        Início
+                    </button>
+                    <button class="nav-btn" onclick="showSearch()">
+                        <i class="fas fa-search"></i>
+                        Buscar
+                    </button>
+                    <button class="nav-btn" onclick="showLibrary()">
+                        <i class="fas fa-book"></i>
+                        Biblioteca
+                    </button>
+                </div>
+            </div>
+
+            <!-- ============ TELA DE BUSCA ============ -->
+            <div class="search-screen" id="searchScreen">
+                <div class="search-header">
+                    <h2>Buscar</h2>
+                    <div class="search-input-wrapper">
+                        <i class="fas fa-search" style="color: #b3b3b3;"></i>
+                        <input type="text" id="searchInput" placeholder="Artistas, músicas, ou podcasts" onkeypress="if(event.key==='Enter') searchYoutube()">
+                    </div>
+                </div>
+
+                <div class="search-results" id="searchResults">
+                    <div class="empty-state">
+                        <i class="fas fa-search"></i>
+                        <p>Pesquise suas músicas favoritas aqui!</p>
+                    </div>
+                </div>
+
+                <div class="bottom-nav">
+                    <button class="nav-btn" onclick="showHome()">
+                        <i class="fas fa-home"></i>
+                        Início
+                    </button>
+                    <button class="nav-btn active" onclick="showSearch()">
+                        <i class="fas fa-search"></i>
+                        Buscar
+                    </button>
+                    <button class="nav-btn" onclick="showLibrary()">
+                        <i class="fas fa-book"></i>
+                        Biblioteca
+                    </button>
+                </div>
+            </div>
+
+            <!-- ============ TELA NOW PLAYING ============ -->
+            <div class="now-playing-screen" id="nowPlayingScreen">
+                <div class="np-header">
+                    <button class="back-btn" onclick="backFromPlayer()">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <h3 style="font-size: 0.85rem; color: #b3b3b3;">TOCANDO AGORA</h3>
+                    <div style="width: 40px;"></div>
+                </div>
+
+                <div class="np-content">
+                    <div class="album-art" id="albumArt">
+                        <i class="fas fa-music" style="font-size: 4rem; color: rgba(255,255,255,0.2);"></i>
+                    </div>
+
+                    <div class="song-info">
+                        <div class="song-title" id="songTitle">Nenhuma música</div>
+                        <div class="artist-name" id="artistName">Selecione uma música</div>
+                    </div>
+
+                    <div class="volume-control">
+                        <i class="fas fa-volume-down" style="color: #b3b3b3;"></i>
+                        <input type="range" id="volumeSlider" min="0" max="100" value="50" oninput="changeVolume()">
+                        <i class="fas fa-volume-up" style="color: #b3b3b3;"></i>
+                    </div>
+
+                    <div class="controls">
+                        <button class="control-btn" onclick="stop()">
+                            <i class="fas fa-stop"></i>
+                        </button>
+                        <button class="control-btn" onclick="pause()">
+                            <i class="fas fa-pause"></i>
+                        </button>
+                        <button class="play-pause-btn" onclick="resume()">
+                            <i class="fas fa-play"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============ MINI PLAYER ============ -->
+            <div class="mini-player" id="miniPlayer" onclick="showNowPlaying()">
+                <img src="" class="mini-cover" id="miniCover" alt="">
+                <div class="mini-info">
+                    <h4 id="miniTitle">Nenhuma música</h4>
+                    <p id="miniArtist">Selecione uma música</p>
+                </div>
+                <div class="mini-controls">
+                    <button onclick="event.stopPropagation(); pause()">
+                        <i class="fas fa-pause"></i>
+                    </button>
+                    <button onclick="event.stopPropagation(); resume()">
+                        <i class="fas fa-play"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+const YOUTUBE_API_KEY = 'Colocar sua Api key do google aqui (deve ter a permissão do serviço do youtube)';
+let currentBoomboxId = null;
+let currentPlaylist = [];
+let recentlyPlayed = [];
+let savedPlaylists = [];
+let currentScreen = 'home';
+let currentTrackIndex = 0;
+let musicTimer = null;
+const MAX_RECENT = 5;
+
+function GetParentResourceName() {
+    return 'art_sound';
+}
+
+// ============ SISTEMA DE CACHE ============
+
+function loadFromCache() {
+    try {
+        const savedPlaylist = localStorage.getItem('boombox_current_playlist');
+        const savedRecent = localStorage.getItem('boombox_recent');
+        const savedPlaylistsData = localStorage.getItem('boombox_saved_playlists');
+        
+        if (savedPlaylist) {
+            currentPlaylist = JSON.parse(savedPlaylist);
+            document.getElementById('playlistCount').textContent = currentPlaylist.length + ' músicas';
+        }
+        
+        if (savedRecent) {
+            recentlyPlayed = JSON.parse(savedRecent);
+            updateRecentlyPlayed();
+        }
+        
+        if (savedPlaylistsData) {
+            savedPlaylists = JSON.parse(savedPlaylistsData);
+        }
+        
+        updateHomePlaylistCards();
+    } catch (error) {
+        console.error('Erro ao carregar cache:', error);
+    }
+}
+
+
+function updateHomePlaylistCards() {
+    // Pegar referência dos 2 cards de playlist
+    const playlistCards = document.querySelectorAll('.recommended-section .playlist-card');
+    
+    if (playlistCards.length < 3) return; // Precisa ter pelo menos 3 cards (1 é "Suas Músicas")
+    
+    // Card 1 (Daily Mix) - índice 1
+    const dailyMixCard = playlistCards[1];
+    // Card 2 (Discover Weekly) - índice 2
+    const discoverCard = playlistCards[2];
+    
+    if (savedPlaylists.length >= 1) {
+        // Tem pelo menos 1 playlist
+        const playlist1 = savedPlaylists[0];
+        const thumbnail1 = playlist1.tracks[0]?.thumbnail || null;
+        
+        dailyMixCard.style.display = 'flex';
+        dailyMixCard.onclick = () => loadPlaylistToQueueAndPlay(playlist1.id);
+        
+        dailyMixCard.innerHTML = `
+            ${thumbnail1 
+                ? `<img src="${thumbnail1}" class="playlist-cover" style="object-fit: cover;" alt="${escapeHtml(playlist1.name)}">` 
+                : `<div class="playlist-cover" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); display: flex; align-items: center; justify-content: center;">
+                       <i class="fas fa-music" style="font-size: 1.5rem; color: rgba(255,255,255,0.5);"></i>
+                   </div>`
+            }
+            <div class="playlist-info">
+                <h4>${escapeHtml(playlist1.name)}</h4>
+                <p>${playlist1.tracks.length} músicas</p>
+            </div>
+        `;
+    } else {
+        // Não tem playlist, esconder
+        dailyMixCard.style.display = 'none';
+    }
+    
+    if (savedPlaylists.length >= 2) {
+        // Tem pelo menos 2 playlists
+        const playlist2 = savedPlaylists[1];
+        const thumbnail2 = playlist2.tracks[0]?.thumbnail || null;
+        
+        discoverCard.style.display = 'flex';
+        discoverCard.onclick = () => loadPlaylistToQueueAndPlay(playlist2.id);
+        
+        discoverCard.innerHTML = `
+            ${thumbnail2 
+                ? `<img src="${thumbnail2}" class="playlist-cover" style="object-fit: cover;" alt="${escapeHtml(playlist2.name)}">` 
+                : `<div class="playlist-cover" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); display: flex; align-items: center; justify-content: center;">
+                       <i class="fas fa-headphones" style="font-size: 1.5rem; color: rgba(255,255,255,0.5);"></i>
+                   </div>`
+            }
+            <div class="playlist-info">
+                <h4>${escapeHtml(playlist2.name)}</h4>
+                <p>${playlist2.tracks.length} músicas</p>
+            </div>
+        `;
+    } else {
+        // Não tem segunda playlist, esconder
+        discoverCard.style.display = 'none';
+    }
+}
+
+
+
+function loadPlaylistToQueueAndPlay(playlistId) {
+    const playlist = savedPlaylists.find(p => p.id === playlistId);
+    if (!playlist) return;
+    
+    currentPlaylist = [...playlist.tracks];
+    currentTrackIndex = 0;
+    document.getElementById('playlistCount').textContent = currentPlaylist.length + ' músicas';
+    saveToCache();
+    
+    // Tocar primeira música
+    if (currentPlaylist.length > 0) {
+        const firstTrack = currentPlaylist[0];
+        playFromSearch(firstTrack.url, firstTrack.title, firstTrack.artist, firstTrack.thumbnail);
+    }
+}
+
+
+
+function saveToCache() {
+    try {
+        localStorage.setItem('boombox_current_playlist', JSON.stringify(currentPlaylist));
+        localStorage.setItem('boombox_recent', JSON.stringify(recentlyPlayed));
+        localStorage.setItem('boombox_saved_playlists', JSON.stringify(savedPlaylists));
+    } catch (error) {
+        console.error('Erro ao salvar cache:', error);
+    }
+}
+
+// ============ SISTEMA DE AUTOPLAY ============
+
+function startMusicTimer(duration) {
+    console.log('[Timer] Iniciando timer de', duration, 'segundos');
+    
+    // Cancelar timer anterior
+    if (musicTimer) {
+        clearTimeout(musicTimer);
+    }
+    
+    musicTimer = setTimeout(() => {
+        console.log('========================================');
+        console.log('[Timer] Música acabou! Tocando próxima...');
+        console.log('========================================');
+        playNextTrackInQueue();
+    }, duration * 1000);
+}
+
+function playNextTrackInQueue() {
+    if (currentPlaylist.length === 0) {
+        console.log('[AutoPlay] Fila vazia');
+        return;
+    }
+    
+    currentTrackIndex++;
+    
+    if (currentTrackIndex >= currentPlaylist.length) {
+        currentTrackIndex = 0;
+        console.log('[AutoPlay] Voltando pro início da fila');
+    }
+    
+    const nextTrack = currentPlaylist[currentTrackIndex];
+    
+    console.log('========================================');
+    console.log('[AutoPlay] Tocando próxima música');
+    console.log('[AutoPlay] Índice:', currentTrackIndex, 'de', currentPlaylist.length);
+    console.log('[AutoPlay] Música:', nextTrack.title);
+    console.log('========================================');
+    
+    playFromSearch(nextTrack.url, nextTrack.title, nextTrack.artist, nextTrack.thumbnail);
+}
+
+// ============ ÚLTIMAS TOCADAS ============
+
+function addToRecent(url, title, artist, thumbnail) {
+    const track = { url, title, artist, thumbnail, timestamp: Date.now() };
+    recentlyPlayed = recentlyPlayed.filter(t => t.url !== url);
+    recentlyPlayed.unshift(track);
+    if (recentlyPlayed.length > MAX_RECENT) {
+        recentlyPlayed = recentlyPlayed.slice(0, MAX_RECENT);
+    }
+    saveToCache();
+    updateRecentlyPlayed();
+}
+
+function updateRecentlyPlayed() {
+    const container = document.getElementById('recentlyPlayedContainer');
+    if (!container) return;
+    
+    container.innerHTML = '';
+    
+    if (recentlyPlayed.length === 0) {
+        container.innerHTML = '<p style="color: #b3b3b3; font-size: 0.85rem; padding: 20px 0;">Nenhuma música tocada ainda</p>';
+        return;
+    }
+    
+    recentlyPlayed.forEach((track) => {
+        const card = document.createElement('div');
+        card.className = 'playlist-card';
+        card.onclick = () => playFromRecent(track);
+        card.innerHTML = `
+            <img src="${track.thumbnail}" class="playlist-cover" style="object-fit: cover; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);" alt="${escapeHtml(track.title)}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+            <div class="playlist-cover" style="display: none; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <i class="fas fa-music" style="font-size: 1.5rem; color: rgba(255,255,255,0.5);"></i>
+            </div>
+            <div class="playlist-info">
+                <h4>${escapeHtml(track.title)}</h4>
+                <p>${escapeHtml(track.artist)}</p>
+            </div>
+        `;
+        container.appendChild(card);
+    });
+}
+
+function playFromRecent(track) {
+    currentTrackIndex = currentPlaylist.findIndex(t => t.url === track.url);
+    if (currentTrackIndex === -1) currentTrackIndex = 0;
+    playFromSearch(track.url, track.title, track.artist, track.thumbnail);
+}
+
+// ============ MENSAGENS DO FIVEM ============
+
+window.addEventListener('message', function(event) {
+    const data = event.data;
+    
+    if (data.action === 'open') {
+        currentBoomboxId = data.boomboxId;
+        
+        if (data.config) {
+            applyConfig(data.config);
+        }
+        
+        document.getElementById('container').style.display = 'block';
+        loadFromCache();
+    } else if (data.action === 'shareCode') {
+        showSharedCode(data.code);
+    } else if (data.action === 'loadedPlaylist') {
+        importPlaylistFromServer(data.playlist);
+    }
+});
+
+
+
+function applyConfig(config) {
+    const primaryColor = config.PrimaryColor || '1DB954';
+    const title = config.Title || 'ArtFy';
+    const description = config.Description || 'Suas Músicas e playlists';
+    const logo = config.Logo || '';
+    
+    // Pegar elementos do header
+    const homeHeader = document.querySelector('.home-header');
+    const homeHeaderH2 = document.querySelector('.home-header h2');
+    const homeHeaderP = document.querySelector('.home-header p');
+    
+    if (logo && logo.trim() !== '') {
+        // TEM LOGO - Esconder texto e mostrar imagem
+        if (homeHeaderH2) homeHeaderH2.style.display = 'none';
+        if (homeHeaderP) homeHeaderP.style.display = 'none';
+        
+        // Criar elemento de logo se não existir
+        let logoElement = document.getElementById('header-logo');
+        if (!logoElement) {
+            logoElement = document.createElement('img');
+            logoElement.id = 'header-logo';
+            logoElement.style.cssText = 'max-width: 200px; max-height: 80px; object-fit: contain; margin: 0 auto; display: block;';
+            homeHeader.appendChild(logoElement);
+        }
+        logoElement.src = logo;
+    } else {
+        // SEM LOGO - Usar texto normal
+        if (homeHeaderH2) {
+            homeHeaderH2.style.display = 'block';
+            homeHeaderH2.textContent = title;
+        }
+        if (homeHeaderP) {
+            homeHeaderP.style.display = 'block';
+            homeHeaderP.textContent = description;
+        }
+        
+        // Remover logo se existir
+        const logoElement = document.getElementById('header-logo');
+        if (logoElement) logoElement.remove();
+    }
+    
+    // Calcular cor mais escura para hover
+    const hoverColor = darkenColor(primaryColor, 20);
+    
+    // Aplicar cor primária em CSS dinâmico
+    const style = document.createElement('style');
+    style.innerHTML = `
+        /* Home Header */
+        .home-header {
+            background: linear-gradient(180deg, #${primaryColor} 0%, #121212 100%) !important;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        /* Search Header */
+        .search-header {
+            background: linear-gradient(180deg, #${primaryColor} 0%, #121212 100%) !important;
+        }
+        
+        /* Now Playing Header */
+        .np-header {
+            background: linear-gradient(180deg, #${primaryColor} 0%, #121212 100%) !important;
+        }
+        
+        /* Botões ativos na navegação */
+        .nav-btn.active {
+            color: #${primaryColor} !important;
+        }
+        
+        /* Botão adicionar à playlist */
+        .add-playlist-btn {
+            background: #${primaryColor} !important;
+            border-color: #${primaryColor} !important;
+            color: white !important;
+        }
+        
+        .add-playlist-btn:hover {
+            background: #${hoverColor} !important;
+            transform: scale(1.1);
+            color: white !important;
+        }
+        
+        /* Botão adicionado (check) */
+        .add-playlist-btn.added {
+            background: #${primaryColor} !important;
+            color: white !important;
+            opacity: 0.8;
+        }
+        
+        .add-playlist-btn.added:hover {
+            background: #${primaryColor} !important;
+            color: white !important;
+            opacity: 1;
+        }
+        
+        /* Todos os botões verdes inline */
+        button[style*="background: #1DB954"],
+        button[style*="background:#1DB954"],
+        button[style*="background: rgb(29, 185, 84)"] {
+            background: #${primaryColor} !important;
+        }
+        
+        button[style*="background: #1DB954"]:hover,
+        button[style*="background:#1DB954"]:hover {
+            background: #${hoverColor} !important;
+        }
+        
+        /* Inputs focados */
+        input:focus {
+            border-color: #${primaryColor} !important;
+        }
+        
+        /* Sliders */
+        input[type="range"]::-webkit-slider-thumb {
+            background: #${primaryColor} !important;
+        }
+        
+        input[type="range"]::-moz-range-thumb {
+            background: #${primaryColor} !important;
+        }
+    `;
+    document.head.appendChild(style);
+}
+
+
+// Função para escurecer cor (para hover)
+function darkenColor(hex, percent) {
+    // Remove # se existir
+    hex = hex.replace('#', '');
+    
+    // Converte para RGB
+    let r = parseInt(hex.substring(0, 2), 16);
+    let g = parseInt(hex.substring(2, 4), 16);
+    let b = parseInt(hex.substring(4, 6), 16);
+    
+    // Diminui o brilho
+    r = Math.floor(r * (100 - percent) / 100);
+    g = Math.floor(g * (100 - percent) / 100);
+    b = Math.floor(b * (100 - percent) / 100);
+    
+    // Converte de volta para hex
+    return ((r << 16) | (g << 8) | b).toString(16).padStart(6, '0');
+}
+
+// Função para escurecer cor (para hover)
+function darkenColor(hex, percent) {
+    // Remove # se existir
+    hex = hex.replace('#', '');
+    
+    // Converte para RGB
+    let r = parseInt(hex.substring(0, 2), 16);
+    let g = parseInt(hex.substring(2, 4), 16);
+    let b = parseInt(hex.substring(4, 6), 16);
+    
+    // Diminui o brilho
+    r = Math.floor(r * (100 - percent) / 100);
+    g = Math.floor(g * (100 - percent) / 100);
+    b = Math.floor(b * (100 - percent) / 100);
+    
+    // Converte de volta para hex
+    return ((r << 16) | (g << 8) | b).toString(16).padStart(6, '0');
+}
+
+
+
+function showPickupChoice(boomboxId) {
+    const overlay = document.createElement('div');
+    overlay.id = 'pickupOverlay';
+    overlay.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 10000;';
+    
+    overlay.innerHTML = `
+        <div style="background: #282828; padding: 30px; border-radius: 15px; text-align: center; min-width: 300px;">
+            <h2 style="color: white; margin-bottom: 20px;">Pegar Caixa de Som</h2>
+            <button onclick="pickupCarry(${boomboxId})" style="width: 100%; background: #1DB954; border: none; padding: 15px; border-radius: 25px; color: white; font-weight: bold; cursor: pointer; margin-bottom: 10px; font-size: 1rem;">
+                <i class="fas fa-hands"></i> Carregar
+            </button>
+            <button onclick="pickupStore(${boomboxId})" style="width: 100%; background: #535353; border: none; padding: 15px; border-radius: 25px; color: white; font-weight: bold; cursor: pointer; margin-bottom: 10px; font-size: 1rem;">
+                <i class="fas fa-box"></i> Guardar
+            </button>
+            <button onclick="cancelPickup()" style="width: 100%; background: #ff3333; border: none; padding: 15px; border-radius: 25px; color: white; font-weight: bold; cursor: pointer; font-size: 1rem;">
+                <i class="fas fa-times"></i> Cancelar
+            </button>
+        </div>
+    `;
+    
+    document.body.appendChild(overlay);
+}
+
+function pickupCarry(boomboxId) {
+    document.getElementById('pickupOverlay').remove();
+    fetch(`https://${GetParentResourceName()}/pickupCarry`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ boomboxId: boomboxId })
+    }).then(resp => resp.json()).catch(err => console.error(err));
+}
+
+function pickupStore(boomboxId) {
+    document.getElementById('pickupOverlay').remove();
+    fetch(`https://${GetParentResourceName()}/pickupStore`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ boomboxId: boomboxId })
+    }).then(resp => resp.json()).catch(err => console.error(err));
+}
+
+function cancelPickup() {
+    document.getElementById('pickupOverlay').remove();
+}
+
+
+function showSharedCode(code) {
+    const display = document.getElementById('shareCodeDisplay');
+    if (display) {
+        display.innerHTML = `
+            <i class="fas fa-check-circle"></i> Código Gerado!<br>
+            <span style="font-size: 1.5rem; letter-spacing: 3px; font-weight: bold;">${code}</span><br>
+            <small style="font-size: 0.75rem; color: #b3b3b3;">Compartilhe este código com outros jogadores!</small>
+        `;
+        display.style.background = 'rgba(29, 185, 84, 0.2)';
+        display.style.borderColor = '#1DB954';
+        display.style.color = '#1DB954';
+        display.style.display = 'block';
+    }
+}
+
+function importPlaylistFromServer(playlist) {
+    if (!playlist || playlist.length === 0) return;
+    
+    const display = document.getElementById('shareCodeDisplay');
+    if (display) {
+        window.tempImportedPlaylist = playlist;
+        
+        display.innerHTML = `
+            <i class="fas fa-download"></i> Nome da Playlist Importada:<br>
+            <input type="text" id="importPlaylistNameInput" placeholder="Playlist Importada" value="Playlist Importada" style="width: 100%; padding: 10px; border-radius: 20px; border: 1px solid #1DB954; background: #242424; color: white; margin: 10px 0; outline: none;">
+            <button onclick="confirmImportPlaylist()" style="background: #1DB954; border: none; padding: 10px 20px; border-radius: 20px; color: white; font-weight: bold; cursor: pointer; width: 100%;">
+                <i class="fas fa-check"></i> Importar (${playlist.length} músicas)
+            </button>
+            <button onclick="cancelImportPlaylist()" style="background: #ff3333; border: none; padding: 10px 20px; border-radius: 20px; color: white; font-weight: bold; cursor: pointer; width: 100%; margin-top: 5px;">
+                <i class="fas fa-times"></i> Cancelar
+            </button>
+        `;
+        display.style.background = 'rgba(29, 185, 84, 0.1)';
+        display.style.borderColor = '#1DB954';
+        display.style.color = 'white';
+        display.style.display = 'block';
+        
+        showPlaylistsScreen();
+        
+        setTimeout(() => {
+            const input = document.getElementById('importPlaylistNameInput');
+            if (input) input.focus();
+        }, 100);
+    }
+}
+
+function confirmImportPlaylist() {
+    const input = document.getElementById('importPlaylistNameInput');
+    const playlistName = input ? input.value.trim() : '';
+    const finalName = playlistName || 'Playlist Importada';
+    const playlist = window.tempImportedPlaylist;
+    
+    if (!playlist) return;
+    
+    const newPlaylist = {
+        id: Date.now(),
+        name: finalName,
+        tracks: playlist,
+        createdAt: Date.now()
+    };
+    
+    savedPlaylists.push(newPlaylist);
+    saveToCache();
+    
+    delete window.tempImportedPlaylist;
+    
+    const display = document.getElementById('shareCodeDisplay');
+    if (display) {
+        display.innerHTML = `
+            <i class="fas fa-check-circle"></i> Playlist "${finalName}" importada com sucesso!<br>
+            <small>${playlist.length} músicas adicionadas</small>
+        `;
+        display.style.background = 'rgba(29, 185, 84, 0.2)';
+        display.style.borderColor = '#1DB954';
+        display.style.color = '#1DB954';
+        display.style.display = 'block';
+        
+        setTimeout(() => {
+            showPlaylistsScreen();
+        }, 100);
+    }
+}
+
+function cancelImportPlaylist() {
+    delete window.tempImportedPlaylist;
+    const display = document.getElementById('shareCodeDisplay');
+    if (display) {
+        display.style.display = 'none';
+    }
+}
+
+// ============ NAVEGAÇÃO ============
+
+function showHome() {
+    document.getElementById('homeScreen').style.display = 'flex';
+    document.getElementById('searchScreen').style.display = 'none';
+    document.getElementById('nowPlayingScreen').style.display = 'none';
+    hideExtraScreens();
+    currentScreen = 'home';
+    updateNavButtons();
+}
+
+function showSearch() {
+    document.getElementById('homeScreen').style.display = 'none';
+    document.getElementById('searchScreen').style.display = 'flex';
+    document.getElementById('nowPlayingScreen').style.display = 'none';
+    hideExtraScreens();
+    currentScreen = 'search';
+    updateNavButtons();
+}
+
+function hideExtraScreens() {
+    const libraryScreen = document.getElementById('libraryScreen');
+    const playlistsScreen = document.getElementById('playlistsScreen');
+    if (libraryScreen) libraryScreen.style.display = 'none';
+    if (playlistsScreen) playlistsScreen.style.display = 'none';
+}
+
+function showLibrary() {
+    showCurrentPlaylist();
+}
+
+function showCurrentPlaylist() {
+    let libraryScreen = document.getElementById('libraryScreen');
+    if (!libraryScreen) {
+        libraryScreen = document.createElement('div');
+        libraryScreen.id = 'libraryScreen';
+        libraryScreen.className = 'search-screen';
+        libraryScreen.style.display = 'none';
+        libraryScreen.innerHTML = `
+            <div class="search-header">
+                <h2>Fila Atual</h2>
+            </div>
+            <div class="search-results" id="libraryResults"></div>
+            <div class="bottom-nav">
+                <button class="nav-btn" onclick="showHome()">
+                    <i class="fas fa-home"></i>
+                    Início
+                </button>
+                <button class="nav-btn" onclick="showSearch()">
+                    <i class="fas fa-search"></i>
+                    Buscar
+                </button>
+                <button class="nav-btn active" onclick="showLibrary()">
+                    <i class="fas fa-book"></i>
+                    Biblioteca
+                </button>
+            </div>
+        `;
+        document.querySelector('.screen').appendChild(libraryScreen);
+    }
+    
+    const resultsDiv = document.getElementById('libraryResults');
+    
+    document.getElementById('homeScreen').style.display = 'none';
+    document.getElementById('searchScreen').style.display = 'none';
+    document.getElementById('nowPlayingScreen').style.display = 'none';
+    hideExtraScreens();
+    libraryScreen.style.display = 'flex';
+    currentScreen = 'library';
+    
+    resultsDiv.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h3><i class="fas fa-list-music"></i> Fila Atual (${currentPlaylist.length} músicas)</h3>
+            <button onclick="showPlaylistsScreen()" style="background: #1DB954; border: none; padding: 8px 16px; border-radius: 20px; color: white; font-weight: bold; cursor: pointer; font-size: 0.85rem;">
+                <i class="fas fa-folder-open"></i> Playlists
+            </button>
+        </div>
+    `;
+    
+    if (currentPlaylist.length === 0) {
+        resultsDiv.innerHTML += '<div class="empty-state"><i class="fas fa-music"></i><p>Nenhuma música na fila.<br>Adicione músicas pesquisando!</p></div>';
+        
+        const actionsDiv = document.createElement('div');
+        actionsDiv.style.padding = '20px';
+        actionsDiv.style.borderTop = '1px solid #282828';
+        actionsDiv.style.marginTop = '20px';
+        actionsDiv.innerHTML = `
+            <button style="background: #1DB954; border: none; padding: 12px 20px; border-radius: 25px; color: white; font-weight: bold; cursor: pointer; width: 100%; margin-bottom: 10px; font-size: 0.9rem;" onclick="showPlaylistsScreen()">
+                <i class="fas fa-folder"></i> Ver Minhas Playlists
+            </button>
+            <input type="text" id="importCodeInput" placeholder="Código para importar playlist" style="width: 100%; padding: 12px 15px; border-radius: 25px; border: 1px solid #535353; background: #242424; color: white; margin-bottom: 10px; outline: none;">
+            <button style="background: #1DB954; border: none; padding: 12px 20px; border-radius: 25px; color: white; font-weight: bold; cursor: pointer; width: 100%; font-size: 0.9rem;" onclick="importPlaylistByCode()">
+                <i class="fas fa-download"></i> Importar Playlist
+            </button>
+            <div id="shareCodeDisplay" style="display: none; margin-top: 15px; padding: 15px; border-radius: 12px; text-align: center; font-weight: bold;"></div>
+        `;
+        resultsDiv.appendChild(actionsDiv);
+        updateNavButtons();
+        return;
+    }
+    
+    currentPlaylist.forEach((item, index) => {
+        const resultDiv = document.createElement('div');
+        resultDiv.className = 'result-item';
+        
+        const thumbnailHTML = item.thumbnail 
+            ? `<img src="${item.thumbnail}" class="result-cover" alt="${escapeHtml(item.title)}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+               <div class="result-cover" style="display: none; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); align-items: center; justify-content: center;">
+                   <i class="fas fa-music" style="color: rgba(255,255,255,0.5); font-size: 1.2rem;"></i>
+               </div>`
+            : `<div class="result-cover" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center;">
+                   <i class="fas fa-music" style="color: rgba(255,255,255,0.5); font-size: 1.2rem;"></i>
+               </div>`;
+        
+        resultDiv.innerHTML = `
+            ${thumbnailHTML}
+            <div class="result-info">
+                <h4>${index + 1}. ${escapeHtml(item.title)}</h4>
+                <p>${item.artist || 'Artista desconhecido'}</p>
+            </div>
+        `;
+        
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'add-playlist-btn added';
+        removeBtn.innerHTML = '<i class="fas fa-trash"></i>';
+        removeBtn.onclick = (e) => {
+            e.stopPropagation();
+            removeFromCurrentPlaylist(index);
+        };
+        
+        resultDiv.appendChild(removeBtn);
+        resultDiv.onclick = () => playTrackFromLibrary(item);
+        resultsDiv.appendChild(resultDiv);
+    });
+    
+    const actionsDiv = document.createElement('div');
+    actionsDiv.style.padding = '20px';
+    actionsDiv.style.borderTop = '1px solid #282828';
+    actionsDiv.style.marginTop = '20px';
+    actionsDiv.innerHTML = `
+        <button style="background: #1DB954; border: none; padding: 12px 20px; border-radius: 25px; color: white; font-weight: bold; cursor: pointer; width: 100%; margin-bottom: 10px; font-size: 0.9rem;" onclick="saveCurrentPlaylistToLibrary()">
+            <i class="fas fa-save"></i> Salvar como Playlist
+        </button>
+        <button style="background: #535353; border: none; padding: 12px 20px; border-radius: 25px; color: white; font-weight: bold; cursor: pointer; width: 100%; margin-bottom: 10px; font-size: 0.9rem;" onclick="shareCurrentPlaylist()">
+            <i class="fas fa-share-alt"></i> Compartilhar Fila Atual
+        </button>
+        <button style="background: #535353; border: none; padding: 12px 20px; border-radius: 25px; color: white; font-weight: bold; cursor: pointer; width: 100%; margin-bottom: 10px; font-size: 0.9rem;" onclick="showPlaylistsScreen()">
+            <i class="fas fa-folder"></i> Ver Minhas Playlists
+        </button>
+        <input type="text" id="importCodeInput" placeholder="Código para importar playlist" style="width: 100%; padding: 12px 15px; border-radius: 25px; border: 1px solid #535353; background: #242424; color: white; margin-bottom: 10px; outline: none;">
+        <button style="background: #1DB954; border: none; padding: 12px 20px; border-radius: 25px; color: white; font-weight: bold; cursor: pointer; width: 100%; font-size: 0.9rem;" onclick="importPlaylistByCode()">
+            <i class="fas fa-download"></i> Importar Playlist
+        </button>
+        <div id="shareCodeDisplay" style="display: none; margin-top: 15px; padding: 15px; border-radius: 12px; text-align: center; font-weight: bold;"></div>
+    `;
+    resultsDiv.appendChild(actionsDiv);
+    
+    updateNavButtons();
+}
+
+// ============ TELA DE PLAYLISTS SALVAS ============
+
+function showPlaylistsScreen() {
+    let playlistsScreen = document.getElementById('playlistsScreen');
+    
+    if (!playlistsScreen) {
+        playlistsScreen = document.createElement('div');
+        playlistsScreen.id = 'playlistsScreen';
+        playlistsScreen.className = 'search-screen';
+        playlistsScreen.style.display = 'none';
+        playlistsScreen.innerHTML = `
+            <div class="search-header" style="display: flex; align-items: center;">
+                <button id="backToLibraryBtn" style="background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; padding: 10px;">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <h2 style="flex: 1; text-align: center; margin: 0;">Minhas Playlists</h2>
+                <div style="width: 50px;"></div>
+            </div>
+            <div class="search-results" id="playlistsResults"></div>
+            <div class="bottom-nav">
+                <button class="nav-btn" onclick="showHome()">
+                    <i class="fas fa-home"></i>
+                    Início
+                </button>
+                <button class="nav-btn" onclick="showSearch()">
+                    <i class="fas fa-search"></i>
+                    Buscar
+                </button>
+                <button class="nav-btn active" onclick="showLibrary()">
+                    <i class="fas fa-book"></i>
+                    Biblioteca
+                </button>
+            </div>
+        `;
+        document.querySelector('.screen').appendChild(playlistsScreen);
+        
+        document.getElementById('backToLibraryBtn').onclick = () => showLibrary();
+    }
+    
+    const resultsDiv = document.getElementById('playlistsResults');
+    
+    document.getElementById('homeScreen').style.display = 'none';
+    document.getElementById('searchScreen').style.display = 'none';
+    document.getElementById('nowPlayingScreen').style.display = 'none';
+    hideExtraScreens();
+    playlistsScreen.style.display = 'flex';
+    
+    resultsDiv.innerHTML = `<h3 style="margin-bottom: 15px;"><i class="fas fa-folder-open"></i> Playlists Salvas (${savedPlaylists.length})</h3>`;
+    
+    if (savedPlaylists.length === 0) {
+        resultsDiv.innerHTML += '<div class="empty-state"><i class="fas fa-folder"></i><p>Nenhuma playlist salva ainda.<br>Salve sua fila atual como playlist!</p></div>';
+        return;
+    }
+    
+    savedPlaylists.forEach((playlist) => {
+    const playlistCard = document.createElement('div');
+    playlistCard.style.cssText = 'background: #282828; border-radius: 12px; padding: 15px; margin-bottom: 15px;';
+    
+    const firstTrack = playlist.tracks[0];
+    
+    const thumbnailDiv = document.createElement('div');
+    if (firstTrack && firstTrack.thumbnail) {
+        thumbnailDiv.innerHTML = `<img src="${firstTrack.thumbnail}" style="width: 100%; height: 150px; object-fit: cover; border-radius: 8px; margin-bottom: 15px;">`;
+    } else {
+        thumbnailDiv.innerHTML = `<div style="width: 100%; height: 150px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; margin-bottom: 15px; display: flex; align-items: center; justify-content: center;">
+            <i class="fas fa-music" style="font-size: 3rem; color: rgba(255,255,255,0.3);"></i>
+        </div>`;
+    }
+    
+    const infoDiv = document.createElement('div');
+    infoDiv.innerHTML = `
+        <h4 style="font-size: 1.1rem; font-weight: bold; margin-bottom: 5px;">${escapeHtml(playlist.name)}</h4>
+        <p style="font-size: 0.85rem; color: #b3b3b3; margin-bottom: 15px;">${playlist.tracks.length} músicas</p>
+    `;
+    
+    const buttonsDiv = document.createElement('div');
+    buttonsDiv.style.cssText = 'display: flex; gap: 10px;';
+    
+    const loadBtn = document.createElement('button');
+    loadBtn.style.cssText = 'flex: 1; background: #1DB954; border: none; padding: 10px; border-radius: 25px; color: white; font-weight: bold; cursor: pointer; font-size: 0.85rem; transition: all 0.2s;';
+    loadBtn.innerHTML = '<i class="fas fa-play"></i> Carregar';
+    loadBtn.onclick = () => loadPlaylistToQueue(playlist.id);
+    loadBtn.onmouseenter = () => loadBtn.style.transform = 'scale(1.05)';
+    loadBtn.onmouseleave = () => loadBtn.style.transform = 'scale(1)';
+    
+    const deleteBtn = document.createElement('button');
+    deleteBtn.style.cssText = 'background: #ff3333; border: none; padding: 10px 15px; border-radius: 25px; color: white; cursor: pointer; transition: all 0.2s;';
+    deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
+    deleteBtn.onclick = () => deletePlaylist(playlist.id);
+    deleteBtn.onmouseenter = () => deleteBtn.style.transform = 'scale(1.1)';
+    deleteBtn.onmouseleave = () => deleteBtn.style.transform = 'scale(1)';
+    
+    // REMOVIDO O BOTÃO COMPARTILHAR
+    buttonsDiv.appendChild(loadBtn);
+    buttonsDiv.appendChild(deleteBtn);
+    
+    playlistCard.appendChild(thumbnailDiv);
+    playlistCard.appendChild(infoDiv);
+    playlistCard.appendChild(buttonsDiv);
+    
+    resultsDiv.appendChild(playlistCard);
+    });
+    
+}
+
+// ============ FUNÇÕES DE PLAYLIST ============
+
+function saveCurrentPlaylistToLibrary() {
+    if (currentPlaylist.length === 0) {
+        const display = document.getElementById('shareCodeDisplay');
+        if (display) {
+            display.innerHTML = '<i class="fas fa-exclamation-triangle"></i> A fila está vazia!';
+            display.style.background = 'rgba(255, 153, 0, 0.2)';
+            display.style.borderColor = '#ff9900';
+            display.style.color = '#ff9900';
+            display.style.display = 'block';
+        }
+        return;
+    }
+    
+    const display = document.getElementById('shareCodeDisplay');
+    if (display) {
+        display.innerHTML = `
+            <i class="fas fa-edit"></i> Nome da Playlist:<br>
+            <input type="text" id="playlistNameInput" placeholder="Minha Playlist" style="width: 100%; padding: 10px; border-radius: 20px; border: 1px solid #1DB954; background: #242424; color: white; margin: 10px 0; outline: none;">
+            <button onclick="confirmSavePlaylist()" style="background: #1DB954; border: none; padding: 10px 20px; border-radius: 20px; color: white; font-weight: bold; cursor: pointer; width: 100%;">
+                <i class="fas fa-save"></i> Confirmar
+            </button>
+            <button onclick="cancelSavePlaylist()" style="background: #ff3333; border: none; padding: 10px 20px; border-radius: 20px; color: white; font-weight: bold; cursor: pointer; width: 100%; margin-top: 5px;">
+                <i class="fas fa-times"></i> Cancelar
+            </button>
+        `;
+        display.style.background = 'rgba(29, 185, 84, 0.1)';
+        display.style.borderColor = '#1DB954';
+        display.style.color = 'white';
+        display.style.display = 'block';
+        
+        setTimeout(() => {
+            const input = document.getElementById('playlistNameInput');
+            if (input) input.focus();
+        }, 100);
+    }
+}
+
+function confirmSavePlaylist() {
+    const input = document.getElementById('playlistNameInput');
+    const playlistName = input ? input.value.trim() : '';
+    const finalName = playlistName || 'Minha Playlist';
+    
+    const newPlaylist = {
+        id: Date.now(),
+        name: finalName,
+        tracks: [...currentPlaylist],
+        createdAt: Date.now()
+    };
+    
+    savedPlaylists.push(newPlaylist);
+    saveToCache();
+    
+    const display = document.getElementById('shareCodeDisplay');
+    if (display) {
+        display.innerHTML = `<i class="fas fa-check-circle"></i> Playlist "${finalName}" salva com sucesso!`;
+        display.style.background = 'rgba(29, 185, 84, 0.2)';
+        display.style.borderColor = '#1DB954';
+        display.style.color = '#1DB954';
+        display.style.display = 'block';
+        
+        setTimeout(() => {
+            display.style.display = 'none';
+        }, 3000);
+    }
+}
+
+function cancelSavePlaylist() {
+    const display = document.getElementById('shareCodeDisplay');
+    if (display) {
+        display.style.display = 'none';
+    }
+}
+
+function shareCurrentPlaylist() {
+    if (currentPlaylist.length === 0) {
+        const display = document.getElementById('shareCodeDisplay');
+        if (display) {
+            display.innerHTML = '<i class="fas fa-exclamation-triangle"></i> A fila está vazia!';
+            display.style.background = 'rgba(255, 153, 0, 0.2)';
+            display.style.borderColor = '#ff9900';
+            display.style.color = '#ff9900';
+            display.style.display = 'block';
+        }
+        return;
+    }
+    
+    fetch(`https://${GetParentResourceName()}/savePlaylist`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ playlist: currentPlaylist })
+    }).then(resp => resp.json()).catch(err => console.error(err));
+}
+
+function sharePlaylist(playlistId) {
+    const playlist = savedPlaylists.find(p => p.id === playlistId);
+    if (!playlist) return;
+    
+    fetch(`https://${GetParentResourceName()}/savePlaylist`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ playlist: playlist.tracks })
+    }).then(resp => resp.json()).catch(err => console.error(err));
+}
+
+function loadPlaylistToQueue(playlistId) {
+    const playlist = savedPlaylists.find(p => p.id === playlistId);
+    if (!playlist) return;
+    
+    currentPlaylist = [...playlist.tracks];
+    currentTrackIndex = 0;
+    document.getElementById('playlistCount').textContent = currentPlaylist.length + ' músicas';
+    saveToCache();
+    
+    showCurrentPlaylist();
+}
+
+function deletePlaylist(playlistId) {
+    const playlist = savedPlaylists.find(p => p.id === playlistId);
+    if (!playlist) return;
+    
+    let display = document.querySelector('#playlistsResults #shareCodeDisplay');
+    
+    if (!display) {
+        display = document.createElement('div');
+        display.id = 'shareCodeDisplay';
+        display.style.cssText = 'display: none; margin-top: 15px; padding: 15px; border-radius: 12px; text-align: center; font-weight: bold;';
+        
+        const resultsDiv = document.getElementById('playlistsResults');
+        if (resultsDiv) {
+            resultsDiv.appendChild(display);
+        } else {
+            return;
+        }
+    }
+    
+    window.tempDeletePlaylistId = playlistId;
+    
+    display.innerHTML = `
+        <i class="fas fa-exclamation-triangle"></i> Deletar "${escapeHtml(playlist.name)}"?<br>
+        <small>${playlist.tracks.length} músicas serão perdidas</small><br><br>
+        <button id="confirmDeleteBtn" style="background: #ff3333; border: none; padding: 10px 20px; border-radius: 20px; color: white; font-weight: bold; cursor: pointer; width: 48%; margin-right: 2%;">
+            <i class="fas fa-trash"></i> SIM
+        </button>
+        <button id="cancelDeleteBtn" style="background: #535353; border: none; padding: 10px 20px; border-radius: 20px; color: white; font-weight: bold; cursor: pointer; width: 48%;">
+            <i class="fas fa-times"></i> NÃO
+        </button>
+    `;
+    display.style.background = 'rgba(255, 51, 51, 0.15)';
+    display.style.borderColor = '#ff3333';
+    display.style.color = 'white';
+    display.style.display = 'block';
+    
+    setTimeout(() => {
+        const confirmBtn = document.getElementById('confirmDeleteBtn');
+        const cancelBtn = document.getElementById('cancelDeleteBtn');
+        
+        if (confirmBtn) {
+            confirmBtn.onclick = confirmDeletePlaylist;
+        }
+        if (cancelBtn) {
+            cancelBtn.onclick = cancelDeletePlaylist;
+        }
+        
+        display.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 100);
+}
+
+function confirmDeletePlaylist() {
+    const playlistId = window.tempDeletePlaylistId;
+    
+    if (!playlistId) return;
+    
+    savedPlaylists = savedPlaylists.filter(p => p.id !== playlistId);
+    saveToCache();
+    
+    delete window.tempDeletePlaylistId;
+    
+    const display = document.getElementById('shareCodeDisplay');
+    if (display) {
+        display.style.display = 'none';
+    }
+    
+    const successMsg = document.createElement('div');
+    successMsg.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(29, 185, 84, 0.95); padding: 20px 40px; border-radius: 12px; z-index: 9999; color: white; font-weight: bold;';
+    successMsg.innerHTML = `<i class="fas fa-check-circle"></i> Playlist deletada!`;
+    document.body.appendChild(successMsg);
+    
+    setTimeout(() => {
+        successMsg.remove();
+        showPlaylistsScreen();
+    }, 1500);
+}
+
+function cancelDeletePlaylist() {
+    delete window.tempDeletePlaylistId;
+    const display = document.getElementById('shareCodeDisplay');
+    if (display) {
+        display.style.display = 'none';
+    }
+}
+
+function importPlaylistByCode() {
+    const input = document.getElementById('importCodeInput');
+    const code = input ? input.value.trim() : '';
+    
+    if (!code) {
+        const display = document.getElementById('shareCodeDisplay');
+        if (display) {
+            display.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Digite um código válido!';
+            display.style.background = 'rgba(255, 51, 51, 0.2)';
+            display.style.borderColor = '#ff3333';
+            display.style.color = '#ff3333';
+            display.style.display = 'block';
+        }
+        return;
+    }
+    
+    fetch(`https://${GetParentResourceName()}/loadPlaylist`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: code })
+    }).then(resp => resp.json()).catch(err => console.error(err));
+}
+
+function importPlaylistByCodeFromPlaylistsScreen() {
+    const input = document.getElementById('importCodeInputPlaylists');
+    const code = input ? input.value.trim() : '';
+    
+    if (!code) {
+        const display = document.getElementById('shareCodeDisplay');
+        if (display) {
+            display.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Digite um código válido!';
+            display.style.background = 'rgba(255, 51, 51, 0.2)';
+            display.style.borderColor = '#ff3333';
+            display.style.color = '#ff3333';
+            display.style.display = 'block';
+        }
+        return;
+    }
+    
+    fetch(`https://${GetParentResourceName()}/loadPlaylist`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: code })
+    }).then(resp => resp.json()).catch(err => console.error(err));
+}
+
+function removeFromCurrentPlaylist(index) {
+    currentPlaylist.splice(index, 1);
+    document.getElementById('playlistCount').textContent = currentPlaylist.length + ' músicas';
+    saveToCache();
+    showCurrentPlaylist();
+}
+
+function playTrackFromLibrary(item) {
+    currentTrackIndex = currentPlaylist.findIndex(track => track.url === item.url);
+    if (currentTrackIndex === -1) currentTrackIndex = 0;
+    console.log('[Fila] Tocando música índice:', currentTrackIndex);
+    playFromSearch(item.url, item.title, item.artist, item.thumbnail);
+}
+
+function showNowPlaying() {
+    document.getElementById('homeScreen').style.display = 'none';
+    document.getElementById('searchScreen').style.display = 'none';
+    document.getElementById('nowPlayingScreen').style.display = 'flex';
+    hideExtraScreens();
+    document.getElementById('miniPlayer').style.display = 'none';
+}
+
+function backFromPlayer() {
+    document.getElementById('miniPlayer').style.display = 'flex';
+    
+    if (currentScreen === 'home') {
+        showHome();
+    } else if (currentScreen === 'library') {
+        showCurrentPlaylist();
+    } else {
+        showSearch();
+    }
+}
+
+function updateNavButtons() {
+    document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+    const navBtns = document.querySelectorAll('.nav-btn');
+    
+    if (currentScreen === 'home') {
+        if (navBtns[0]) navBtns[0].classList.add('active');
+        if (navBtns[3]) navBtns[3].classList.add('active');
+        if (navBtns[6]) navBtns[6].classList.add('active');
+    } else if (currentScreen === 'search') {
+        if (navBtns[1]) navBtns[1].classList.add('active');
+        if (navBtns[4]) navBtns[4].classList.add('active');
+        if (navBtns[7]) navBtns[7].classList.add('active');
+    } else if (currentScreen === 'library') {
+        if (navBtns[2]) navBtns[2].classList.add('active');
+        if (navBtns[5]) navBtns[5].classList.add('active');
+        if (navBtns[8]) navBtns[8].classList.add('active');
+    }
+}
+
+function closeMenu() {
+    document.getElementById('container').style.display = 'none';
+    
+    // Cancelar timer ao fechar
+    if (musicTimer) {
+        clearTimeout(musicTimer);
+        musicTimer = null;
+    }
+    
+    fetch(`https://${GetParentResourceName()}/close`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({})
+    }).then(resp => resp.json()).catch(err => console.error(err));
+}
+
+// ============ PESQUISA YOUTUBE ============
+
+async function searchYoutube() {
+    const query = document.getElementById('searchInput').value;
+    if (!query) return;
+    
+    const resultsDiv = document.getElementById('searchResults');
+    resultsDiv.innerHTML = '<div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Pesquisando...</p></div>';
+    
+    try {
+        const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&type=video&maxResults=20&key=${YOUTUBE_API_KEY}`;
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        if (!data.items || data.items.length === 0) {
+            resultsDiv.innerHTML = '<div class="empty-state"><i class="fas fa-search"></i><p>Nenhum resultado encontrado</p></div>';
+            return;
+        }
+        
+        resultsDiv.innerHTML = '<h3>Resultados</h3>';
+        
+        data.items.forEach(item => {
+            const videoId = item.id.videoId;
+            const title = item.snippet.title;
+            const thumbnail = item.snippet.thumbnails.medium ? item.snippet.thumbnails.medium.url : item.snippet.thumbnails.default.url;
+            const channelTitle = item.snippet.channelTitle;
+            const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
+            
+            const resultDiv = document.createElement('div');
+            resultDiv.className = 'result-item';
+            resultDiv.innerHTML = `
+                <img src="${thumbnail}" class="result-cover" alt="${escapeHtml(title)}">
+                <div class="result-info">
+                    <h4>${escapeHtml(title)}</h4>
+                    <p>${escapeHtml(channelTitle)}</p>
+                </div>
+            `;
+            
+            const addBtn = document.createElement('button');
+            addBtn.className = 'add-playlist-btn';
+            addBtn.innerHTML = '<i class="fas fa-plus"></i>';
+            addBtn.onclick = (e) => {
+                e.stopPropagation();
+                addToPlaylist(videoUrl, title, channelTitle, thumbnail, addBtn);
+            };
+            
+            resultDiv.appendChild(addBtn);
+            resultDiv.onclick = () => playFromSearch(videoUrl, title, channelTitle, thumbnail);
+            resultsDiv.appendChild(resultDiv);
+        });
+        
+    } catch (error) {
+        console.error('Erro ao pesquisar:', error);
+        resultsDiv.innerHTML = '<div class="empty-state" style="color: #ff3333;"><i class="fas fa-exclamation-triangle"></i><p>Erro ao pesquisar</p></div>';
+    }
+}
+
+// ============ REPRODUÇÃO ============
+
+function extractYouTubeID(url) {
+    const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+    const match = url.match(regex);
+    return match ? match[1] : null;
+}
+
+function parseISO8601Duration(duration) {
+    const match = duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+    if (!match) return 240;
+    const hours = parseInt(match[1] || 0);
+    const minutes = parseInt(match[2] || 0);
+    const seconds = parseInt(match[3] || 0);
+    return hours * 3600 + minutes * 60 + seconds;
+}
+
+function playFromSearch(url, title, artist, thumbnail) {
+    const videoId = extractYouTubeID(url);
+    
+    console.log('[NUI] Video ID:', videoId);
+    
+    if (videoId) {
+        fetch(`https://www.googleapis.com/youtube/v3/videos?part=contentDetails&id=${videoId}&key=${YOUTUBE_API_KEY}`)
+            .then(resp => resp.json())
+            .then(data => {
+                let duration = 240;
+                
+                if (data.items && data.items[0]) {
+                    const durationISO = data.items[0].contentDetails.duration;
+                    duration = parseISO8601Duration(durationISO);
+                    console.log('[NUI] Duração ISO:', durationISO, '=', duration, 'segundos');
+                } else {
+                    console.log('[NUI] Sem dados de duração, usando padrão');
+                }
+                
+                console.log('[NUI] Enviando para servidor - Duração:', duration, 's');
+                
+                fetch(`https://${GetParentResourceName()}/play`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url: url, duration: duration })
+                }).then(resp => resp.json()).then(resp => {
+                    addToRecent(url, title, artist, thumbnail);
+                    
+                    document.getElementById('songTitle').textContent = title;
+                    document.getElementById('artistName').textContent = artist;
+                    document.getElementById('albumArt').innerHTML = `<img src="${thumbnail}" alt="${title}">`;
+                    
+                    document.getElementById('miniCover').src = thumbnail;
+                    document.getElementById('miniTitle').textContent = title;
+                    document.getElementById('miniArtist').textContent = artist;
+                    document.getElementById('miniPlayer').style.display = 'flex';
+                    
+                    showNowPlaying();
+                    
+                    // CRIAR TIMER PARA PRÓXIMA MÚSICA
+                    startMusicTimer(duration);
+                    
+                    console.log('[NUI] Tocando:', title, '- Duração:', duration, 's');
+                }).catch(err => console.error('Erro ao tocar:', err));
+            })
+            .catch(err => {
+                console.error('Erro ao buscar duração:', err);
+                tocarSemDuracao(url, title, artist, thumbnail);
+            });
+    } else {
+        console.log('[NUI] Não é YouTube, usando duração padrão');
+        tocarSemDuracao(url, title, artist, thumbnail);
+    }
+}
+
+function tocarSemDuracao(url, title, artist, thumbnail) {
+    fetch(`https://${GetParentResourceName()}/play`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: url, duration: 240 })
+    }).then(resp => resp.json()).then(resp => {
+        addToRecent(url, title, artist, thumbnail);
+        
+        document.getElementById('songTitle').textContent = title;
+        document.getElementById('artistName').textContent = artist;
+        document.getElementById('albumArt').innerHTML = `<img src="${thumbnail}" alt="${title}">`;
+        
+        document.getElementById('miniCover').src = thumbnail;
+        document.getElementById('miniTitle').textContent = title;
+        document.getElementById('miniArtist').textContent = artist;
+        document.getElementById('miniPlayer').style.display = 'flex';
+        
+        showNowPlaying();
+        
+        // CRIAR TIMER
+        startMusicTimer(240);
+    }).catch(err => console.error('Erro ao tocar:', err));
+}
+
+// ============ ADICIONAR À FILA ============
+
+function addToPlaylist(url, title, artist, thumbnail, button) {
+    const exists = currentPlaylist.some(item => item.url === url);
+    if (exists) {
+        button.innerHTML = '<i class="fas fa-check"></i>';
+        button.classList.add('added');
+        return;
+    }
+    
+    currentPlaylist.push({ 
+        url: url, 
+        title: title,
+        artist: artist,
+        thumbnail: thumbnail
+    });
+    
+    document.getElementById('playlistCount').textContent = currentPlaylist.length + ' músicas';
+    saveToCache();
+    
+    button.innerHTML = '<i class="fas fa-check"></i>';
+    button.classList.add('added');
+    
+    console.log('[NUI] Música adicionada à fila:', title);
+}
+
+// ============ CONTROLES ============
+
+function pause() {
+    // Pausar timer
+    if (musicTimer) {
+        clearTimeout(musicTimer);
+        musicTimer = null;
+    }
+    
+    fetch(`https://${GetParentResourceName()}/pause`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({})
+    }).then(resp => resp.json()).catch(err => console.error(err));
+}
+
+function resume() {
+    fetch(`https://${GetParentResourceName()}/resume`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({})
+    }).then(resp => resp.json()).catch(err => console.error(err));
+}
+
+function stop() {
+    // Cancelar timer
+    if (musicTimer) {
+        clearTimeout(musicTimer);
+        musicTimer = null;
+    }
+    
+    fetch(`https://${GetParentResourceName()}/stop`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({})
+    }).then(resp => resp.json()).catch(err => console.error(err));
+}
+
+function changeVolume() {
+    const volume = document.getElementById('volumeSlider').value / 100;
+    fetch(`https://${GetParentResourceName()}/volume`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ volume: volume })
+    }).then(resp => resp.json()).catch(err => console.error(err));
+}
+
+// ============ UTILIDADES ============
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+document.addEventListener('keyup', function(e) {
+    if (e.key === 'Escape') {
+        closeMenu();
+    }
+});
+
+    </script>
+</body>
+</html>
