@@ -2,6 +2,7 @@
 
 Script de som para QBCore inspirado no Spotify, permitindo reproduzir músicas do YouTube em seu servidor FiveM/QBCore.
 
+![ArtFy Preview](https://media.discordapp.net/attachments/1211175577994919956/1430858789556588645/image.png?ex=68fd48d7&is=68fbf757&hm=77f2ab01d34edc9e7402d597368e0f2cf1563caba0252e182455c77de7cf71bd&=&format=webp&quality=lossless&width=1718&height=967)
 ## 📋 Descrição
 
 ArtFy é um sistema de reprodução de música que traz uma experiência similar ao Spotify para seu servidor QBCore. Os jogadores podem reproduzir músicas do YouTube, controlar volume, criar playlists e compartilhar música com outros jogadores.
